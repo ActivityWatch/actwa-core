@@ -15,7 +15,7 @@ class Rule:
     ignore_case: bool
 
     def __init__(self, rules: Dict[str, Any]):
-        self.select_keys = rules.get("select_keys", None)
+        self.select_keys = rules.get("select_keys", ["app", "title"])
         self.ignore_case = rules.get("ignore_case", False)
 
         # NOTE: Also checks that the regex isn't an empty string (which would erroneously match everything)
@@ -29,10 +29,15 @@ class Rule:
         )
 
     def match(self, e: Event) -> bool:
-        if self.select_keys:
-            values = [e.data.get(key, None) for key in self.select_keys]
-        else:
+        # `data` contains keys like 'app', 'title'
+        # by default, the rule regex is matched against all values
+
+        if self.select_keys == 'all'
             values = list(e.data.values())
+        elif self.select_keys:
+            values = [e.data.get(key, None) for key in self.select_keys]
+
+        # although there is a `type` field on the rule name, right now the only valid type is regex
         if self.regex:
             for val in values:
                 if isinstance(val, str) and self.regex.search(val):
